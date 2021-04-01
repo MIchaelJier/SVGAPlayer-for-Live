@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>svgaplayer-for-live demo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<style>
+    #SVGAArea {
+        width: 320px;
+        height: 320px;
+    }
+</style>
+
+<body>
+    <div id="SVGAArea" /> 
+    <script src="./../dist/SVGAPlayer.min.js"></script> 
+    <script>
+       const a = new SVGAPlayer('#SVGAArea')
+       const oss = '//static-pro.guangdianyun.tv/static/svga'
+       const svgaArr = [
+         `${oss}/666/666·.svga`,
+         `${oss}/么么哒/MMD.svga`,
+         `${oss}/加油鸭/JYY.svga`,
+         `${oss}/吃瓜/CG.svga`,
+        //  `${oss}/干杯/ganbeisvga.svga`,
+        //  `${oss}/我要上麦/WYSM.svga`,
+        //  `${oss}/打call/Dcall.svga`,
+        //  `${oss}/棒棒糖/BBT.svga`,
+        //  `${oss}/比心/BX.svga`,
+        //  `${oss}/点赞/DZ.svga`,
+        //  `${oss}/热气球/RQQ.svga`,
+        //  `${oss}/爱心/AX.svga`,
+        //  `${oss}/直升机/fj.svga`,
+        //  `${oss}/礼花/LH.svga`,
+        //  `${oss}/红包/HB.svga`,
+        //  `${oss}/纸鹤/ZH.svga`,
+        //  `${oss}/荧光棒/YGB.svga`,
+        //  `${oss}/跑车/跑车2.svga`,
+        //  `${oss}/鼓掌/gz.svga`,
+       ]
+       const svgaArr2 = [
+         `${oss}/666/666·.svga`,
+         `${oss}/么么哒/MMD.svga`,
+         `${oss}/加油鸭/JYY.svga`,
+         `${oss}/吃瓜/CG.svga`,
+         `${oss}/干杯/ganbeisvga.svga`,
+         `${oss}/我要上麦/WYSM.svga`,
+        //  `${oss}/鼓掌/gz.svga`,
+       ]
+       a.enqueue(svgaArr)
+       setTimeout(() => {
+        console.log('2 start')
+        a.enqueue(svgaArr2)
+       }, 5000)
+    </script>
+</body>
+
+</html>
