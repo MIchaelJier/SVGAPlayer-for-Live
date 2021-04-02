@@ -5,6 +5,7 @@ import commonjs from 'rollup-plugin-commonjs'
 import resolve from 'rollup-plugin-node-resolve'
 import { terser } from 'rollup-plugin-terser'
 import babel from '@rollup/plugin-babel'
+import json from '@rollup/plugin-json'
 
 const extensions = ['.js', '.jsx', '.ts', '.tsx']
 
@@ -49,6 +50,7 @@ export default {
   ],
   plugins: [
     resolve(),
+    json(),
     commonjs({
       include: 'node_modules/**',
     }),
@@ -58,6 +60,7 @@ export default {
     babel({
       exclude: 'node_modules/**',
       extensions,
+      babelHelpers: 'runtime',
     }),
     // liveServer({
     //   port: 8090,

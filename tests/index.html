@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>svgaplayer-for-live demo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<style>
+    #SVGAArea {
+        width: 320px; 
+        height: 320px;
+        border: 1px solid #000;
+    }
+    #message {
+        width: 100%; 
+        height: auto;
+        border: 1px solid #000;
+        text-align: center;
+        font-size: 15px;
+        line-height: 15px
+    }
+</style> 
+
+<body> 
+    <div>
+        <canvas id="SVGAArea"></canvas> 
+        <div id="message" /> 
+    </div>
+    <script src="./../dist/SVGAPlayer.min.js"></script> 
+    <script>
+        //  const req = new XMLHttpRequest()
+        //  req.open("GET", '//static-pro.guangdianyun.tv/static/svga/666/666·.svga', true);
+        //  req.responseType = "arraybuffer"
+        //  // load success
+        //  req.onload = () => {
+        //     const a = new SVGAPlayer('#SVGAArea')
+        //     a.enqueue([new File([req.response], '666')])
+        //  };
+        //  // load error
+        //  req.onerror = (err) => {
+        //      if (failure) {
+        //          failure(err);
+        //          return;
+        //      }
+        //      console.error(err);
+        //      throw err;
+        //  };
+        //  req.send()
+       const a = new SVGAPlayer('#SVGAArea')
+       a.startCallback = (data) => {
+        document.getElementById('message').innerText = data.value
+       }
+       a.endCallback = (data) => {
+        document.getElementById('message').innerText = ''
+       }
+       const oss = '//static-pro.guangdianyun.tv/static/svga'
+       const svgaArr = [
+         {value: `${oss}/666/666·.svga`  },
+         {value: `${oss}/么么哒/MMD.svga` },
+         {value: `${oss}/加油鸭/JYY.svga` },
+         {value: `${oss}/吃瓜/CG.svga`    },
+       ]
+       const svgaArr2 = [
+         {value:`${oss}/666/666·.svga`},
+         {value:`${oss}/么么哒/MMD.svga`},
+         {value:`${oss}/加油鸭/JYY.svga`},
+         {value:`${oss}/吃瓜/CG.svga`},
+         {value:`${oss}/干杯/ganbeisvga.svga`},
+         {value:`${oss}/我要上麦/WYSM.svga`},
+       ]
+       console.log(a)
+       a.enqueue(svgaArr)
+       setTimeout(() => {
+        console.log('2 start')
+        a.enqueue(svgaArr2)
+       }, 5000)
+    </script>
+</body>
+
+</html>

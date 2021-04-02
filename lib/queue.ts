@@ -1,3 +1,5 @@
+import { SVAGElementArr, SVAGElementItem } from './types'
+
 class Queue {
   map = new WeakMap()
 
@@ -8,22 +10,36 @@ class Queue {
    * 向队列尾部添加一个（或多个）新的项
    * @param element
    */
-  enqueue(...element: any[]): void {
+  baseEnqueue(...element: SVAGElementArr): void {
     const q = this.map.get(this)
     q.push(...element)
   }
   /**
    * 移除队列的第一个（排在队列最前面的）项，并返回被移除的元素
    */
-  dequeue(): any {
+  dequeue(): SVAGElementItem {
     const q = this.map.get(this)
     const r = q.shift()
     return r
   }
   /**
+   * 替换队列中的某个值
+   */
+  queueGet(key: number): SVAGElementItem {
+    const q = this.map.get(this)
+    return q[key]
+  }
+  /**
+   * 替换队列中的某个值
+   */
+  queueReplace(key: number, item: SVAGElementItem): void {
+    const q = this.map.get(this)
+    q[key] = item
+  }
+  /**
    * 返回队列中第一个元素——最先被添加，也将是最先被移除的元素。队列不做任何变动（不移除元素，只返回元素信息）
    */
-  front(): any {
+  front(): SVAGElementItem {
     const q = this.map.get(this)
     return q[0]
   }
