@@ -48,7 +48,11 @@
         //      throw err;
         //  };
         //  req.send()
-       const a = new SVGAPlayer('#SVGAArea')
+       const a = new SVGAPlayer({
+           target: '#SVGAArea',
+           useDB: false,
+           preDown: 1
+       })
        a.startCallback = (data) => {
         document.getElementById('message').innerText = data.value
        }

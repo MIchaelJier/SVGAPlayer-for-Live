@@ -9,7 +9,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "rollup": "rollup --config",
+    "build": "rollup --config",
     "tsc": "tsc",
     "publish": "npm publish --access public"
   },

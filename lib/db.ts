@@ -7,8 +7,7 @@ export default class DB {
   constructor(
     { name, version, storeName } = {
       name: 'SVGA.DB',
-      // eslint-disable-next-line radix
-      version: parseInt(pkg.version),
+      version: parseFloat(pkg.version),
       storeName: 'svga_file',
     }
   ) {
