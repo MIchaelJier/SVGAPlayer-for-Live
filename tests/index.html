@@ -53,12 +53,13 @@
            useDB: false,
            preDown: 1
        })
-       a.startCallback = (data) => {
+       a.$on('start',(data) => {
         document.getElementById('message').innerText = data.value
-       }
-       a.endCallback = (data) => {
+       })
+       a.$on('end', () => {
         document.getElementById('message').innerText = ''
-       }
+       })
+     
        const oss = '//static-pro.guangdianyun.tv/static/svga'
        const svgaArr = [
          {value: `${oss}/666/666·.svga`  },
