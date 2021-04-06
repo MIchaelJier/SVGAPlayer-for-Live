@@ -1,6 +1,6 @@
 {
   "name": "@gdyfe/svgaplayer-for-live",
-  "version": "1.0.0",
+  "version": "1.0.2", 
   "description": "SVGAPlayer",
   "main": "dist/SVGAPlayer.esm.js",
   "repository": "https://github.com/MIchaelJier/SVGAPlayer-for-Live.git",

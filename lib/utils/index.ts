@@ -1,10 +1,20 @@
-/* eslint-disable no-undef */
-export const base64ToArrayBuffer = (base64: 'string'): ArrayBuffer => {
-  const binary_string = window.atob(base64)
-  const len = binary_string.length
-  const bytes = new Uint8Array(len)
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binary_string.charCodeAt(i)
+export const isArrayBuffer = (data: any): boolean =>
+  Reflect.toString.call(data) === '[object ArrayBuffer]'
+
+export const isVideoEntity = (data: any): boolean =>
+  Reflect.toString.call(data) === '[object Object]' && data.version
+
+export const version = (data: ArrayBuffer): number => {
+  const dataHeader = new Uint8Array(data, 0, 4)
+
+  if (
+    dataHeader[0] === 80 &&
+    dataHeader[1] === 75 &&
+    dataHeader[2] === 3 &&
+    dataHeader[3] === 4
+  ) {
+    return 1
+  } else {
+    return 2
   }
-  return bytes.buffer
 }

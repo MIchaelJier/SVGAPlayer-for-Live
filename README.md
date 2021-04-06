@@ -11,8 +11,8 @@ yarn add @gdyfe/svgaplayer-for-live -D
 <script src="./dist/SVGAPlayer.min.js"></script> 
 // npm
 import websocketHeartbeat from '@gdyfe/svgaplayer-for-live'
-new SVGAPlayer({
-    // option
+const player = SVGAPlayer({ 
+    // option 
     target: string | HTMLCanvasElement 
     db?: boolean // boolean  是否开启IndexedDB 
     preDown?: number // number 预加载个数 
@@ -23,6 +23,10 @@ new SVGAPlayer({
     cacheFrames: false,
     intersectionObserverRender: true,
   })
+// 插入动画
+player.enqueue([ 
+  { vaule: http://xxx.svga // *必有属性  } 
+])
 ```
 ## Event
 ```javascript

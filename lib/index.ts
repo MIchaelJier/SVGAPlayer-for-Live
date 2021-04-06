@@ -15,10 +15,13 @@ import {
   SVGAElementSign,
 } from './types'
 import DB from './db'
+import { isArrayBuffer, isVideoEntity, version } from './utils/index'
+import Parser1x from 'svga.lite/parser.1x'
 
 class PlayerQueue extends Queue {
   public player: SVAG.Player | null = null
   public parser: SVAG.Parser | null = null
+  public parser1x: SVAG.Parser | null = null
   public downloader: SVAG.Downloader | null = null
   private db: DB | null = null
   private playing = false
@@ -50,6 +53,7 @@ class PlayerQueue extends Queue {
     try {
       this.downloader = new SVAG.Downloader()
       this.player = new SVAG.Player(element)
+      this.parser1x = new Parser1x()
       this.parser = new SVAG.Parser()
       this.db = new DB()
     } catch (error) {
@@ -92,8 +96,8 @@ class PlayerQueue extends Queue {
    * play 队列播放动画
    */
   private async play(): Promise<void> {
-    const { player, parser, downloader } = this
-    if (!parser || !player || !downloader) return
+    const { player, parser, downloader, parser1x } = this
+    if (!parser || !player || !downloader || !parser1x) return
     // 队列为空时摧毁
     if (this.isEmpty()) {
       this.destroyed()
@@ -101,30 +105,50 @@ class PlayerQueue extends Queue {
     }
     let svgaDataInner = null
     let svgaData = null
+    const versionParser = async (data: ArrayBuffer) => {
+      const svgaFile =
+        version(data) === 1 ? await parser1x.do(data) : await parser.do(data)
+      return svgaFile
+    }
     // db获取
     if (this.options.useDB && this.db) {
-      svgaData = (await this.db.find(
-        this.front().value as string
-      )) as VideoEntity
+      const dbData = await this.db.find(this.front().value as string)
+      if (isArrayBuffer(dbData)) {
+        svgaData = await versionParser(dbData)
+      } else if (isVideoEntity(dbData)) {
+        svgaData = dbData as VideoEntity
+      }
     }
     if (!svgaData) {
       // 如果是ArrayBuffer
-      if (
-        Reflect.toString.call(this.front()?.value) === '[object ArrayBuffer]'
-      ) {
+      if (isArrayBuffer(this.front()?.value)) {
         svgaDataInner = this.front().value as ArrayBuffer
+        svgaData = await versionParser(svgaDataInner)
+      } else if (isVideoEntity(this.front()?.value)) {
+        svgaData = this.front()?.value as VideoEntity
       } else {
+        const front = this.front().value as string
         this.preDown(this.options.preDown)
-        svgaDataInner = await downloader.get(this.front().value as string)
+        svgaDataInner = await downloader.get(front)
+        svgaData = await versionParser(svgaDataInner)
+        await this.insertDB(front, svgaData)
       }
-      svgaData = await parser.do(svgaDataInner)
-      this.options.useDB &&
-        this.db &&
-        (await (this.db as any).insert(this.front().value, svgaData))
     }
     player.set(this.baseOptions)
     await player.mount(svgaData)
     player.start()
+  }
+  /**
+   * 插入IndexedDB
+   * @param key 插入的key
+   * @param data 插入的值
+   */
+  private async insertDB(key: string, data: VideoEntity | ArrayBuffer) {
+    if (this.options.useDB && this.db) {
+      const result = await (this.db as any).insert(key, data)
+      return result
+    }
+    return
   }
   /**
    * svga 预加载 默认加载后面的1个
@@ -135,14 +159,15 @@ class PlayerQueue extends Queue {
     const lastPlayedSum = this.playedSum
     next.forEach(async (item: SVGAElementItem, index: number) => {
       if (
-        Reflect.toString.call(this.queueGet(index + 1).value) !==
-        '[object ArrayBuffer]'
+        !isArrayBuffer(this.queueGet(index + 1).value) &&
+        !isVideoEntity(this.queueGet(index + 1).value)
       ) {
         const sign = Symbol('')
+        const value = item.value as string
         this.map.get(this)[index + 1][SVGAElementSign] = sign
-        const buffer = await (this.downloader as Downloader).get(
-          item.value as string
-        )
+        const buffer = await (this.downloader as Downloader).get(value)
+        await this.insertDB(value, buffer)
+        // const result = await (this.parser as SVAG.Parser).do(buffer)
         const offset = this.playedSum - lastPlayedSum
         if (
           index - offset >= 0 &&
@@ -167,12 +192,21 @@ class PlayerQueue extends Queue {
    * 摧毁
    */
   public destroyed(): void {
-    const { player, parser, downloader } = this
-    if (!parser || !player || !downloader) return
+    const { player, parser, downloader, parser1x } = this
+    if (!parser || !player || !downloader || !parser1x) return
     downloader.destroy()
     parser.destroy()
     player.destroy()
+    parser1x.destroy()
+    this.playing = false
+    this.playedSum = 0
   }
 }
 
-export default PlayerQueue
+export default (
+  options: SVGAoptions,
+  baseOptions: playOptions
+): PlayerQueue => {
+  const queue = new PlayerQueue(options, baseOptions)
+  return queue
+}

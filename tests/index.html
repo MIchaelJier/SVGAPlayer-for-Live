@@ -25,7 +25,7 @@
 
 <body> 
     <div>
-        <canvas id="SVGAArea"></canvas> 
+        <canvas id="SVGAArea"></canvas>  
         <div id="message" /> 
     </div>
     <script src="./../dist/SVGAPlayer.min.js"></script> 
@@ -48,9 +48,9 @@
         //      throw err;
         //  };
         //  req.send()
-       const a = new SVGAPlayer({
+       const a = SVGAPlayer({
            target: '#SVGAArea',
-           useDB: false,
+           useDB: true,
            preDown: 1
        })
        a.$on('start',(data) => {
