@@ -1,13 +1,13 @@
 {
   "name": "@gdyfe/svgaplayer-for-live",
-  "version": "1.0.2", 
-  "description": "SVGAPlayer",
+  "version": "1.0.3", 
+  "description": "SVGAPlayer for live,  based on SVGAPlayer-Web-Lite",
   "main": "dist/SVGAPlayer.esm.js",
   "repository": "https://github.com/MIchaelJier/SVGAPlayer-for-Live.git",
   "homepage": "https://github.com/MIchaelJier/SVGAPlayer-for-Live.git",
   "author": "MichaelJier <chem908430737@icloud.com>",
   "license": "MIT",
-  "private": false,
+  "private": false, 
   "scripts": {
     "build": "rollup --config",
     "tsc": "tsc",
@@ -40,12 +40,15 @@
     "rollup-plugin-typescript2": "^0.29.0",
     "typescript": "^4.1.3"
   },
-  "dependencies": {
-    "jszip": "^3.6.0",
-    "jszip-utils": "^0.1.0",
+  "dependencies": { 
     "svga.lite": "^1.5.0"
   },
   "keywords": [
-    "SVGAPlayer"
+    "SVGAPlayer",
+    "svga",
+    "IndexedDB",
+    "Queue", 
+    "player",
+    "animation"
   ]
 }

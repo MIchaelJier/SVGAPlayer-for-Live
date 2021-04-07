@@ -13,6 +13,7 @@ import {
   SVGAElementItem,
   SVGAoptions,
   SVGAElementSign,
+  Events,
 } from './types'
 import DB from './db'
 import { isArrayBuffer, isVideoEntity, version } from './utils/index'
@@ -31,6 +32,19 @@ class PlayerQueue extends Queue {
     useDB: true,
     preDown: 0,
   }
+  readonly initEvents = {
+    start: () => {
+      this.playing = true
+    },
+    end: () => {
+      this.playing = false
+      this.playedSum++
+      this.dequeue()
+      this.play()
+    },
+  }
+  private events: Events = {}
+
   private baseOptions: playOptions = {
     loop: 1,
     // 开启后对已绘制的帧进行缓存，提升重复播放动画性能
@@ -41,6 +55,7 @@ class PlayerQueue extends Queue {
 
   constructor(options: SVGAoptions, baseOptions: playOptions) {
     super()
+    Object.assign(this.events, this.initEvents)
     Object.assign(this.options, options)
     Object.assign(this.baseOptions, baseOptions)
     this.init(options?.target)
@@ -69,24 +84,40 @@ class PlayerQueue extends Queue {
     if (!this.player) return
     switch (eventName) {
       case 'start':
-        this.player.$on('start' as EVENT_TYPES.START, () => {
-          this.playing = true
-          execFunction && execFunction(this.front())
-        })
-        break
       case 'end':
-        this.player.$on('end' as EVENT_TYPES.END, () => {
-          this.playing = false
+        this.events[eventName] = () => {
+          this.initEvents[eventName]()
           execFunction && execFunction(this.front())
-          this.playedSum++
-          this.dequeue()
-          this.play()
-        })
+        }
         break
       default:
-        this.player.$on(eventName, () => {
-          execFunction(this.front())
+        this.events[eventName] = () => {
+          execFunction && execFunction(this.front())
+        }
+        break
+    }
+    this.player.$on(eventName, this.events[eventName] as () => void)
+    return this
+  }
+
+  public $off(eventName: EVENT_TYPES | 'all'): PlayerQueue | undefined {
+    if (!this.player) return
+    const player = this.player as SVGA.Player
+    switch (eventName) {
+      case 'all':
+        Object.keys(this.events).forEach((name) => {
+          this.$on(name as EVENT_TYPES, () => {})
         })
+        this.events = this.initEvents
+        break
+      case 'start':
+      case 'end':
+        player.$on(eventName, this.initEvents[eventName])
+        this.events[eventName] = this.initEvents[eventName]
+        break
+      default:
+        delete this.events[eventName]
+        player.$on(eventName, () => {})
         break
     }
     return this
@@ -131,11 +162,16 @@ class PlayerQueue extends Queue {
         this.preDown(this.options.preDown)
         svgaDataInner = await downloader.get(front)
         svgaData = await versionParser(svgaDataInner)
+
         await this.insertDB(front, svgaData)
       }
     }
     player.set(this.baseOptions)
     await player.mount(svgaData)
+    Object.keys(this.events).forEach((eventName) => {
+      const name = eventName as EVENT_TYPES
+      player.$on(name, this.events[name] as () => void)
+    })
     player.start()
   }
   /**
@@ -182,8 +218,15 @@ class PlayerQueue extends Queue {
    * 向队列尾部添加一个（或多个）新的项
    * @param element
    */
-  public async enqueue(element: SVGAElementArr): Promise<void> {
-    super.baseEnqueue(...element)
+  public async enqueue(
+    element: SVGAElementArr | SVGAElementItem
+  ): Promise<void> {
+    Array.isArray(element)
+      ? super.baseEnqueue(...element)
+      : super.baseEnqueue(element)
+    if (!this.player) {
+      this.init(this.options?.target)
+    }
     if (!this.playing) {
       this.play()
     }
@@ -191,13 +234,26 @@ class PlayerQueue extends Queue {
   /**
    * 摧毁
    */
-  public destroyed(): void {
+  public destroyed(
+    param = {
+      player: true,
+      parser: true,
+      parser1x: true,
+      downloader: true,
+      events: false,
+    }
+  ): void {
     const { player, parser, downloader, parser1x } = this
     if (!parser || !player || !downloader || !parser1x) return
-    downloader.destroy()
-    parser.destroy()
-    player.destroy()
-    parser1x.destroy()
+    param.downloader && downloader.destroy()
+    param.parser && parser.destroy()
+    param.player && player.destroy()
+    param.parser1x && parser1x.destroy()
+    param.events && this.$off('all')
+    this.player = null
+    this.parser = null
+    this.downloader = null
+    this.parser1x = null
     this.playing = false
     this.playedSum = 0
   }

@@ -61,12 +61,8 @@
        })
      
        const oss = '//static-pro.guangdianyun.tv/static/svga'
-       const svgaArr = [
-         {value: `${oss}/666/666·.svga`  },
-         {value: `${oss}/么么哒/MMD.svga` },
-         {value: `${oss}/加油鸭/JYY.svga` },
-         {value: `${oss}/吃瓜/CG.svga`    },
-       ]
+       const svgaArr =  {value: `${oss}/666/666·.svga` }
+       
        const svgaArr2 = [
          {value:`${oss}/666/666·.svga`},
          {value:`${oss}/么么哒/MMD.svga`},
@@ -75,11 +71,12 @@
          {value:`${oss}/干杯/ganbeisvga.svga`},
          {value:`${oss}/我要上麦/WYSM.svga`},
        ]
-       console.log(a)
        a.enqueue(svgaArr)
+       console.log(a)
        setTimeout(() => {
         console.log('2 start')
         a.enqueue(svgaArr2)
+
        }, 5000)
     </script>
 </body>
